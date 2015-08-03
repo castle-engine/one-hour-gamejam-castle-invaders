@@ -41,7 +41,6 @@ begin
   Window.Height := 600;
 
   Config.Load;
-  Application.Initialize;
   Window.OpenAndRun;
   Config.Save;
 end.
