@@ -98,6 +98,15 @@ begin
   Bg := TGLImage.Create(ApplicationData('bg.png'), [], 800, 600, riBilinear);
 end;
 
+procedure WindowClose(Container: TUIContainer);
+begin
+  FreeAndNil(PlayerImage);
+  FreeAndNil(EnemyImage);
+  FreeAndNil(PlayerRocketImage);
+  FreeAndNil(EnemyRocketImage);
+  FreeAndNil(Bg);
+end;
+
 procedure WindowPress(Container: TUIContainer; const Event: TInputPressRelease);
 var
   NewRocket: TRocket;
@@ -293,6 +302,7 @@ initialization
   { create Window and initialize Window callbacks }
   Window := TCastleWindowCustom.Create(Application);
   Window.OnOpen := @WindowOpen;
+  Window.OnClose := @WindowClose;
   Window.OnPress := @WindowPress;
   Window.OnUpdate := @WindowUpdate;
   Window.OnRender := @WindowRender;
