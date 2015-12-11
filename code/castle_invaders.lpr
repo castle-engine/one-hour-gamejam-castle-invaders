@@ -40,7 +40,7 @@ begin
   Window.Width := 800;
   Window.Height := 600;
 
-  Config.Load;
+  UserConfig.Load;
   Window.OpenAndRun;
-  Config.Save;
+  UserConfig.Save;
 end.
