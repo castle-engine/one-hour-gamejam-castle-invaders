@@ -275,17 +275,17 @@ var
   X, Y, I: Integer;
 begin
   Bg.Draw(Window.Rect);
-  PlayerImage.Draw(Round(PlayerX), Round(PlayerY));
+  PlayerImage.Draw(PlayerX, PlayerY);
 
   for X := 0 to InvX - 1 do
     for Y := 0 to InvY - 1 do
       if Invaders[X, Y].Exists then
-        EnemyImage.Draw(Round(Invaders[X, Y].X), Round(Invaders[X, Y].Y));
+        EnemyImage.Draw(Invaders[X, Y].X, Invaders[X, Y].Y);
 
   for I := 0 to PlayerRocketsCount - 1 do
-    PlayerRocketImage.Draw(Round(PlayerRockets[I].X), Round(PlayerRockets[I].Y));
+    PlayerRocketImage.Draw(PlayerRockets[I].X, PlayerRockets[I].Y);
   for I := 0 to EnemyRocketsCount - 1 do
-    EnemyRocketImage.Draw(Round(EnemyRockets[I].X), Round(EnemyRockets[I].Y));
+    EnemyRocketImage.Draw(EnemyRockets[I].X, EnemyRockets[I].Y);
 end;
 
 procedure WindowResize(Container: TUIContainer);
