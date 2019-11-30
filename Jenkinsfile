@@ -20,6 +20,7 @@ pipeline {
         sh 'castle-engine package --os=win64 --cpu=x86_64 --verbose'
         sh 'castle-engine package --os=win32 --cpu=i386 --verbose'
         sh 'castle-engine package --os=linux --cpu=x86_64 --verbose'
+        sh 'castle-engine package --target=android --verbose'
       }
     }
   }
