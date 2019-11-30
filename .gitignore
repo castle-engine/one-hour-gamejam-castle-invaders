@@ -1,5 +1,6 @@
 *~
 *.o
 *.ppu
+castle-engine-output/
 castle_invaders.exe
 castle_invaders

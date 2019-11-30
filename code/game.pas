@@ -22,12 +22,12 @@ uses CastleWindow, CastleLevels, CastlePlayer, CastleCameras,
   CastleSceneManager;
 
 var
-  Window: TCastleWindowCustom;
+  Window: TCastleWindowBase;
 
 implementation
 
 uses SysUtils,
-  CastleWarnings, CastleProgress, CastleWindowProgress, CastleResources,
+  CastleProgress, CastleWindowProgress, CastleResources,
   CastleUIControls, CastleKeysMouse, CastleVectors, CastleGLImages, CastleImages,
   CastleFilesUtils, CastleMessages;
 
@@ -48,7 +48,7 @@ const
   MaxRockets = 10;
   TimeToRocketScale = 2;
 var
-  PlayerImage, EnemyImage, PlayerRocketImage, EnemyRocketImage, Bg: TGLImage;
+  PlayerImage, EnemyImage, PlayerRocketImage, EnemyRocketImage, Bg: TDrawableImage;
   PlayerX, PlayerY: Single;
   Invaders: array [0..InvX - 1, 0..InvY - 1] of TInvader;
   PlayerRocketsCount: Integer;
@@ -64,7 +64,6 @@ procedure ApplicationInitialize;
 var
   X, Y: Integer;
 begin
-  OnWarning := @OnWarningWrite;
   Progress.UserInterface := WindowProgressInterface;
   PlayerY := 30;
   PlayerX := 400;
@@ -82,29 +81,17 @@ begin
 
   TimeToRocket := 2 * TimeToRocketScale;
   TimeToSwitchHMove := 2;
+
+  PlayerImage := TDrawableImage.Create('castle-data:/player.png');
+  EnemyImage := TDrawableImage.Create('castle-data:/enemy1.png');
+  PlayerRocketImage := TDrawableImage.Create('castle-data:/player_rocket.png');
+  EnemyRocketImage := TDrawableImage.Create('castle-data:/enemy_rocket.png');
+  Bg := TDrawableImage.Create('castle-data:/bg.png', [], 800, 600, riBilinear);
 end;
 
 function MyGetApplicationName: string;
 begin
   Result := 'castle_invaders';
-end;
-
-procedure WindowOpen(Container: TUIContainer);
-begin
-  PlayerImage := TGLImage.Create(ApplicationData('player.png'));
-  EnemyImage := TGLImage.Create(ApplicationData('enemy1.png'));
-  PlayerRocketImage := TGLImage.Create(ApplicationData('player_rocket.png'));
-  EnemyRocketImage := TGLImage.Create(ApplicationData('enemy_rocket.png'));
-  Bg := TGLImage.Create(ApplicationData('bg.png'), [], 800, 600, riBilinear);
-end;
-
-procedure WindowClose(Container: TUIContainer);
-begin
-  FreeAndNil(PlayerImage);
-  FreeAndNil(EnemyImage);
-  FreeAndNil(PlayerRocketImage);
-  FreeAndNil(EnemyRocketImage);
-  FreeAndNil(Bg);
 end;
 
 procedure WindowPress(Container: TUIContainer; const Event: TInputPressRelease);
@@ -184,7 +171,7 @@ var
 begin
   Window.Invalidate; // just redraw every frame
 
-  SecondsPassed := Window.Fps.UpdateSecondsPassed;
+  SecondsPassed := Window.Fps.SecondsPassed;
 
   if Container.Pressed[K_A] then
     PlayerX -= SecondsPassed * PlayerSpeed;
@@ -300,14 +287,17 @@ initialization
   Application.OnInitialize := @ApplicationInitialize;
 
   { create Window and initialize Window callbacks }
-  Window := TCastleWindowCustom.Create(Application);
-  Window.OnOpen := @WindowOpen;
-  Window.OnClose := @WindowClose;
+  Window := TCastleWindowBase.Create(Application);
   Window.OnPress := @WindowPress;
   Window.OnUpdate := @WindowUpdate;
   Window.OnRender := @WindowRender;
   Window.OnResize := @WindowResize;
-  Window.RenderStyle := rs2D;
   Window.FpsShowOnCaption := true;
   Application.MainWindow := Window;
+finalization
+  FreeAndNil(PlayerImage);
+  FreeAndNil(EnemyImage);
+  FreeAndNil(PlayerRocketImage);
+  FreeAndNil(EnemyRocketImage);
+  FreeAndNil(Bg);
 end.
