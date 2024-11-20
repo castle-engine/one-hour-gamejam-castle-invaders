@@ -1,5 +1,5 @@
 {
-  Copyright 2014 Michalis Kamburelis.
+  Copyright 2014-2024 Michalis Kamburelis.
 
   This file is part of "Castle Invaders".
 
@@ -18,16 +18,14 @@ unit Game;
 
 interface
 
-uses CastleWindow, CastleLevels, CastlePlayer, CastleCameras,
-  CastleSceneManager;
+uses CastleWindow;
 
 var
-  Window: TCastleWindowBase;
+  Window: TCastleWindow;
 
 implementation
 
 uses SysUtils,
-  CastleProgress, CastleWindowProgress, CastleResources,
   CastleUIControls, CastleKeysMouse, CastleVectors, CastleGLImages, CastleImages,
   CastleFilesUtils, CastleMessages;
 
@@ -64,7 +62,6 @@ procedure ApplicationInitialize;
 var
   X, Y: Integer;
 begin
-  Progress.UserInterface := WindowProgressInterface;
   PlayerY := 30;
   PlayerX := 400;
 
@@ -94,20 +91,32 @@ begin
   Result := 'castle_invaders';
 end;
 
-procedure WindowPress(Container: TUIContainer; const Event: TInputPressRelease);
+type
+  { View to contain whole UI and to handle events, like updates. }
+  TMyView = class(TCastleView)
+    function Press(const Event: TInputPressRelease): Boolean; override;
+    procedure Update(const SecondsPassed: Single; var HandleInput: Boolean); override;
+    procedure Render; override;
+  end;
+
+function TMyView.Press(const Event: TInputPressRelease): Boolean;
 var
   NewRocket: TRocket;
 begin
-  if Event.IsKey(K_Space) and (PlayerRocketsCount < MaxRockets) then
+  Result := inherited;
+  if Result then Exit;
+
+  if Event.IsKey(keySpace) and (PlayerRocketsCount < MaxRockets) then
   begin
     NewRocket.X := PlayerX + 20;
     NewRocket.Y := PlayerY + 60;
     PlayerRockets[PlayerRocketsCount] := NewRocket;
     Inc(PlayerRocketsCount);
+    Exit(true);
   end;
 end;
 
-procedure WindowUpdate(Container: TUIContainer);
+procedure TMyView.Update(const SecondsPassed: Single; var HandleInput: Boolean);
 
   function RocketHit(const Rocket: TRocket): boolean;
   var
@@ -156,8 +165,6 @@ procedure WindowUpdate(Container: TUIContainer);
     end;
   end;
 
-var
-  SecondsPassed: Single;
 const
   PlayerSpeed = 300;
   PlayerRocketSpeed = 500;
@@ -169,13 +176,11 @@ var
   NewRocket: TRocket;
   OddY, SomethingExists: boolean;
 begin
-  Window.Invalidate; // just redraw every frame
+  inherited;
 
-  SecondsPassed := Window.Fps.SecondsPassed;
-
-  if Container.Pressed[K_A] then
+  if Container.Pressed[keyA] or Container.Pressed[keyArrowLeft] then
     PlayerX -= SecondsPassed * PlayerSpeed;
-  if Container.Pressed[K_D] then
+  if Container.Pressed[keyD] or Container.Pressed[keyArrowRight] then
     PlayerX += SecondsPassed * PlayerSpeed;
 
   for I := 0 to PlayerRocketsCount - 1 do
@@ -257,10 +262,12 @@ begin
   end;
 end;
 
-procedure WindowRender(Container: TUIContainer);
+procedure TMyView.Render;
 var
   X, Y, I: Integer;
 begin
+  inherited;
+
   Bg.Draw(Window.Rect);
   PlayerImage.Draw(PlayerX, PlayerY);
 
@@ -275,10 +282,8 @@ begin
     EnemyRocketImage.Draw(EnemyRockets[I].X, EnemyRockets[I].Y);
 end;
 
-procedure WindowResize(Container: TUIContainer);
-begin
-end;
-
+var
+  MyView: TMyView;
 initialization
   { This should be done as early as possible to mark our log lines correctly. }
   OnGetApplicationName := @MyGetApplicationName;
@@ -287,12 +292,12 @@ initialization
   Application.OnInitialize := @ApplicationInitialize;
 
   { create Window and initialize Window callbacks }
-  Window := TCastleWindowBase.Create(Application);
-  Window.OnPress := @WindowPress;
-  Window.OnUpdate := @WindowUpdate;
-  Window.OnRender := @WindowRender;
-  Window.OnResize := @WindowResize;
+  Window := TCastleWindow.Create(Application);
   Window.FpsShowOnCaption := true;
+
+  MyView := TMyView.Create(Application);
+  Window.Container.View := MyView;
+
   Application.MainWindow := Window;
 finalization
   FreeAndNil(PlayerImage);
