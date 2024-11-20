@@ -27,7 +27,7 @@ implementation
 
 uses SysUtils,
   CastleUIControls, CastleKeysMouse, CastleVectors, CastleGLImages, CastleImages,
-  CastleFilesUtils, CastleMessages;
+  CastleFilesUtils, CastleMessages, CastleApplicationProperties;
 
 const
   InvX = 10;
@@ -84,11 +84,6 @@ begin
   PlayerRocketImage := TDrawableImage.Create('castle-data:/player_rocket.png');
   EnemyRocketImage := TDrawableImage.Create('castle-data:/enemy_rocket.png');
   Bg := TDrawableImage.Create('castle-data:/bg.png', [], 800, 600, riBilinear);
-end;
-
-function MyGetApplicationName: string;
-begin
-  Result := 'castle_invaders';
 end;
 
 type
@@ -286,7 +281,7 @@ var
   MyView: TMyView;
 initialization
   { This should be done as early as possible to mark our log lines correctly. }
-  OnGetApplicationName := @MyGetApplicationName;
+  ApplicationProperties.ApplicationName := 'castle_invaders';
 
   { initialize Application callbacks }
   Application.OnInitialize := @ApplicationInitialize;
